@@ -374,85 +374,165 @@ export default function Dashboard() {
     outline: "none",
   };
 
+  const [activePage, setActivePage] = useState<"marketing" | "comercial">("marketing");
+
+  const navItems = [
+    { id: "marketing" as const, label: "Marketing", icon: (
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+      </svg>
+    )},
+    { id: "comercial" as const, label: "Comercial", icon: (
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+    )},
+  ];
+
   return (
-    <div style={{ minHeight: "100vh", background: C.preto, fontFamily: "Inter, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: C.preto, fontFamily: "Inter, sans-serif", display: "flex" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap'); * { box-sizing: border-box; }`}</style>
 
-      {/* TOPBAR */}
-      <header style={{
-        position: "sticky", top: 0, zIndex: 20,
-        background: C.preto,
-        borderBottom: `1px solid rgba(201,168,76,0.2)`,
+      {/* SIDEBAR */}
+      <aside style={{
+        width: 220,
+        minHeight: "100vh",
+        background: "#0D0D0D",
+        borderRight: `1px solid rgba(201,168,76,0.12)`,
+        display: "flex",
+        flexDirection: "column",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        zIndex: 30,
       }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "12px 40px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "4px", textTransform: "uppercase", color: C.dourado }}>IMPERIUM</p>
-            <div style={{ width: 1, height: 16, background: "rgba(201,168,76,0.3)" }} />
-            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", letterSpacing: "1px" }}>SESSÃO ESTRATÉGIA</p>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
-            <select value={account} onChange={(e) => setAccount(e.target.value)} style={selectStyle}>
-              {accountOptions.map((a) => <option key={a} value={a}>{a}</option>)}
-            </select>
-
-            <MultiSelect
-              options={campaignOptions}
-              selected={selectedCampaigns}
-              onChange={(v) => { setSelectedCampaigns(v); setSelectedAdsets([]); }}
-              placeholder="Todas as campanhas"
-            />
-
-            <MultiSelect
-              options={adsetOptions}
-              selected={selectedAdsets}
-              onChange={setSelectedAdsets}
-              placeholder="Todos os conjuntos"
-              maxLabel={30}
-            />
-
-            <select value={selectedCrm} onChange={(e) => setSelectedCrm(e.target.value)} style={selectStyle}>
-              {(vendas?.lists || ["Janeiro","Fevereiro","Março","Abril"]).map((l) => (
-                <option key={l} value={l}>{l}</option>
-              ))}
-            </select>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <input type="date" value={since} onChange={(e) => setSince(e.target.value)} style={inputStyle} />
-              <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 12 }}>→</span>
-              <input type="date" value={until} onChange={(e) => setUntil(e.target.value)} style={inputStyle} />
-            </div>
-
-            <button onClick={fetchAll} disabled={loading} style={{
-              display: "flex", alignItems: "center", gap: 8,
-              background: C.dourado, color: C.preto,
-              border: "none", borderRadius: 8,
-              padding: "7px 16px", fontSize: 12, fontWeight: 700,
-              letterSpacing: "1px", textTransform: "uppercase",
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.7 : 1,
-              fontFamily: "Inter, sans-serif",
-            }}>
-              {loading ? <Spinner /> : (
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              )}
-              Atualizar
-            </button>
-          </div>
+        {/* Logo */}
+        <div style={{ padding: "28px 24px 20px", borderBottom: `1px solid rgba(201,168,76,0.12)` }}>
+          <p style={{ fontSize: 13, fontWeight: 900, letterSpacing: "4px", textTransform: "uppercase", color: C.dourado }}>IMPERIUM</p>
+          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", letterSpacing: "1px", marginTop: 4 }}>DASHBOARD</p>
         </div>
-      </header>
 
-      <main style={{ maxWidth: 1200, margin: "0 auto", padding: "48px 40px", display: "flex", flexDirection: "column", gap: 64 }}>
+        {/* Nav */}
+        <nav style={{ padding: "16px 12px", flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+          {navItems.map((item) => {
+            const isActive = activePage === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActivePage(item.id)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 12,
+                  padding: "10px 12px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: isActive ? "rgba(201,168,76,0.12)" : "transparent",
+                  color: isActive ? C.dourado : "rgba(255,255,255,0.45)",
+                  fontSize: 13,
+                  fontWeight: isActive ? 600 : 400,
+                  cursor: "pointer",
+                  fontFamily: "Inter, sans-serif",
+                  textAlign: "left",
+                  width: "100%",
+                  transition: "all 0.15s",
+                  borderLeft: isActive ? `2px solid ${C.dourado}` : "2px solid transparent",
+                }}
+              >
+                {item.icon}
+                {item.label}
+              </button>
+            );
+          })}
+        </nav>
 
+        {/* Last update */}
         {lastUpdate && (
-          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", letterSpacing: "1px", marginTop: -40 }}>
-            Atualizado às {lastUpdate.toLocaleTimeString("pt-BR")} · refresh automático a cada 5 min
-          </p>
+          <div style={{ padding: "16px 20px", borderTop: `1px solid rgba(255,255,255,0.06)` }}>
+            <p style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", letterSpacing: "1px", lineHeight: 1.6 }}>
+              Atualizado<br />{lastUpdate.toLocaleTimeString("pt-BR")}
+            </p>
+          </div>
         )}
+      </aside>
+
+      {/* MAIN AREA */}
+      <div style={{ marginLeft: 220, flex: 1, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+
+        {/* TOPBAR */}
+        <header style={{
+          position: "sticky", top: 0, zIndex: 20,
+          background: C.preto,
+          borderBottom: `1px solid rgba(201,168,76,0.2)`,
+        }}>
+          <div style={{ padding: "12px 40px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "3px", textTransform: "uppercase", color: "rgba(255,255,255,0.35)" }}>
+              {activePage === "marketing" ? "MARKETING" : "COMERCIAL"}
+            </p>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              {activePage === "marketing" && (
+                <>
+                  <select value={account} onChange={(e) => setAccount(e.target.value)} style={selectStyle}>
+                    {accountOptions.map((a) => <option key={a} value={a}>{a}</option>)}
+                  </select>
+
+                  <MultiSelect
+                    options={campaignOptions}
+                    selected={selectedCampaigns}
+                    onChange={(v) => { setSelectedCampaigns(v); setSelectedAdsets([]); }}
+                    placeholder="Todas as campanhas"
+                  />
+
+                  <MultiSelect
+                    options={adsetOptions}
+                    selected={selectedAdsets}
+                    onChange={setSelectedAdsets}
+                    placeholder="Todos os conjuntos"
+                    maxLabel={30}
+                  />
+
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <input type="date" value={since} onChange={(e) => setSince(e.target.value)} style={inputStyle} />
+                    <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 12 }}>→</span>
+                    <input type="date" value={until} onChange={(e) => setUntil(e.target.value)} style={inputStyle} />
+                  </div>
+                </>
+              )}
+
+              {activePage === "comercial" && (
+                <select value={selectedCrm} onChange={(e) => setSelectedCrm(e.target.value)} style={selectStyle}>
+                  {(vendas?.lists || ["Janeiro","Fevereiro","Março","Abril"]).map((l) => (
+                    <option key={l} value={l}>{l}</option>
+                  ))}
+                </select>
+              )}
+
+              <button onClick={fetchAll} disabled={loading} style={{
+                display: "flex", alignItems: "center", gap: 8,
+                background: C.dourado, color: C.preto,
+                border: "none", borderRadius: 8,
+                padding: "7px 16px", fontSize: 12, fontWeight: 700,
+                letterSpacing: "1px", textTransform: "uppercase",
+                cursor: loading ? "not-allowed" : "pointer",
+                opacity: loading ? 0.7 : 1,
+                fontFamily: "Inter, sans-serif",
+              }}>
+                {loading ? <Spinner /> : (
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                )}
+                Atualizar
+              </button>
+            </div>
+          </div>
+        </header>
+
+      <main style={{ padding: "48px 40px", display: "flex", flexDirection: "column", gap: 64 }}>
 
         {/* TRÁFEGO META ADS */}
+        {activePage === "marketing" && (<>
+        {/* MARKETING SECTIONS */}
         <section>
           <SectionHeader number="01" label="Tráfego pago" title="Meta Ads — Sessão Estratégia" />
           <Divider />
@@ -808,7 +888,10 @@ export default function Dashboard() {
           </section>
         )}
 
+        </>)}
+
         {/* VENDAS CLICKUP */}
+        {activePage === "comercial" && (
         <section>
           <SectionHeader number="03" label="Comercial" title={`Vendas — CRM ${selectedCrm}`} />
           <Divider />
@@ -852,12 +935,14 @@ export default function Dashboard() {
             </div>
           </div>
         </section>
+        )}
 
         <p style={{ textAlign: "center", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", paddingBottom: 16 }}>
           IMPERIUM CLÍNICO ODONTO · {new Date().getFullYear()}
         </p>
 
       </main>
+      </div>
     </div>
   );
 }
