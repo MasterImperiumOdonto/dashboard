@@ -31,6 +31,7 @@ interface MetaResponse {
 }
 interface LeadsStats { total: number; mql: number; naoMql: number; icpStart: number; icpAceleracao: number; }
 interface LeadsResponse { total: LeadsStats; meta: LeadsStats; bio: LeadsStats; }
+interface VendasResponse { lists: string[]; selectedList: string; v6: number; v12: number; totalVendas: number; mrr: number; faturamento: number; }
 
 const monthStart = () => { const d = new Date(); d.setDate(1); return d.toISOString().split("T")[0]; };
 const todayStr = () => new Date().toISOString().split("T")[0];
@@ -243,6 +244,7 @@ function MultiSelect({ options, selected, onChange, placeholder, maxLabel = 35 }
 export default function Dashboard() {
   const [meta, setMeta] = useState<MetaResponse | null>(null);
   const [leads, setLeads] = useState<LeadsResponse | null>(null);
+  const [vendas, setVendas] = useState<VendasResponse | null>(null);
   const [metaError, setMetaError] = useState("");
   const [leadsError, setLeadsError] = useState("");
   const [since, setSince] = useState(monthStart());
@@ -250,6 +252,7 @@ export default function Dashboard() {
   const [account, setAccount] = useState("CA-CONTING");
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
   const [selectedAdsets, setSelectedAdsets] = useState<string[]>([]);
+  const [selectedCrm, setSelectedCrm] = useState("Abril");
   const [loading, setLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
@@ -272,18 +275,28 @@ export default function Dashboard() {
     } catch { setLeadsError("Erro ao buscar leads"); }
   }, [since, until]);
 
+  const fetchVendas = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/vendas?list=${selectedCrm}`);
+      const data = await res.json();
+      if (!data.error) setVendas(data);
+    } catch {}
+  }, [selectedCrm]);
+
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    await Promise.all([fetchMeta(), fetchLeads()]);
+    await Promise.all([fetchMeta(), fetchLeads(), fetchVendas()]);
     setLastUpdate(new Date());
     setLoading(false);
-  }, [fetchMeta, fetchLeads]);
+  }, [fetchMeta, fetchLeads, fetchVendas]);
 
   useEffect(() => {
     fetchAll();
     const t = setInterval(fetchAll, 5 * 60 * 1000);
     return () => clearInterval(t);
   }, [fetchAll]);
+
+  useEffect(() => { fetchVendas(); }, [fetchVendas]);
 
   const allCampaigns = selectedCampaigns.length === 0;
   const allAdsets = selectedAdsets.length === 0;
@@ -397,6 +410,12 @@ export default function Dashboard() {
               placeholder="Todos os conjuntos"
               maxLabel={30}
             />
+
+            <select value={selectedCrm} onChange={(e) => setSelectedCrm(e.target.value)} style={selectStyle}>
+              {(vendas?.lists || ["Janeiro","Fevereiro","Março","Abril"]).map((l) => (
+                <option key={l} value={l}>{l}</option>
+              ))}
+            </select>
 
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <input type="date" value={since} onChange={(e) => setSince(e.target.value)} style={inputStyle} />
@@ -788,6 +807,51 @@ export default function Dashboard() {
             </div>
           </section>
         )}
+
+        {/* VENDAS CLICKUP */}
+        <section>
+          <SectionHeader number="03" label="Comercial" title={`Vendas — CRM ${selectedCrm}`} />
+          <Divider />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+            <KpiCard label="Total de Vendas" value={vendas ? String(vendas.totalVendas) : "—"} dark accent={C.dourado} />
+            <KpiCard label="MRR Gerado" value={vendas ? brl(vendas.mrr) : "—"} dark accent={C.verde} />
+            <KpiCard label="Faturamento (Contratos)" value={vendas ? brl(vendas.faturamento) : "—"} dark accent={C.verde} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16, marginTop: 16 }}>
+            <div style={{ background: "#141414", borderRadius: 12, padding: 24, border: `1px solid rgba(201,168,76,0.15)` }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 16 }}>Assessorado 6 Meses</p>
+              <p style={{ fontSize: 48, fontWeight: 900, color: C.azul, lineHeight: 1 }}>{vendas ? vendas.v6 : "—"}</p>
+              {vendas && vendas.v6 > 0 && (
+                <div style={{ marginTop: 12, display: "flex", gap: 24 }}>
+                  <div>
+                    <p style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", letterSpacing: "1px", textTransform: "uppercase" }}>Contrato</p>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: C.branco }}>{brl(vendas.v6 * 8400)}</p>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", letterSpacing: "1px", textTransform: "uppercase" }}>MRR</p>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: C.verde }}>{brl(vendas.v6 * 1400)}/mês</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div style={{ background: "#141414", borderRadius: 12, padding: 24, border: `1px solid rgba(201,168,76,0.15)` }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 16 }}>Assessorado 12 Meses</p>
+              <p style={{ fontSize: 48, fontWeight: 900, color: C.dourado, lineHeight: 1 }}>{vendas ? vendas.v12 : "—"}</p>
+              {vendas && vendas.v12 > 0 && (
+                <div style={{ marginTop: 12, display: "flex", gap: 24 }}>
+                  <div>
+                    <p style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", letterSpacing: "1px", textTransform: "uppercase" }}>Contrato</p>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: C.branco }}>{brl(vendas.v12 * 24000)}</p>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", letterSpacing: "1px", textTransform: "uppercase" }}>MRR</p>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: C.verde }}>{brl(vendas.v12 * 2000)}/mês</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
 
         <p style={{ textAlign: "center", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "rgba(255,255,255,0.2)", paddingBottom: 16 }}>
           IMPERIUM CLÍNICO ODONTO · {new Date().getFullYear()}
