@@ -371,7 +371,7 @@ export default function Dashboard() {
         background: C.preto,
         borderBottom: `1px solid rgba(201,168,76,0.2)`,
       }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 40px", height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "12px 40px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "4px", textTransform: "uppercase", color: C.dourado }}>IMPERIUM</p>
             <div style={{ width: 1, height: 16, background: "rgba(201,168,76,0.3)" }} />
