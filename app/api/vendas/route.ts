@@ -10,7 +10,7 @@ const LISTS: Record<string, string> = {
   "Maio": "901327058856",
 };
 
-const STATUS_ASSESSORADO = ["assessorado 6 meses", "assessorado 12 meses", "assessorado aceleração", "assessorado aceleracao"];
+const STATUS_ASSESSORADO = ["assessorado 6 meses", "assessorado 12 meses", "assessorado aceleração", "assessorado aceleracao", "assessorado start"];
 
 const FIELD_PARCELA = "bee304b0-afd7-4efb-9d7b-49ec565e292f";
 const FIELD_CONTRATO = "adc117e3-34a1-4f4c-b4e7-b00a44c7400d";
