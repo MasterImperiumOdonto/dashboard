@@ -13,7 +13,7 @@ const SE_CAMPAIGNS = [
 ];
 
 async function fetchInsights(accountId: string, timeRange: string, level: string) {
-  const fields = "campaign_name,adset_name,ad_name,spend,impressions,outbound_clicks,ctr,cpc,actions";
+  const fields = "campaign_name,adset_name,ad_name,spend,impressions,clicks,outbound_clicks,ctr,cpc,actions";
   const url = `https://graph.facebook.com/v19.0/${accountId}/insights?fields=${fields}&time_range=${timeRange}&level=${level}&limit=200&access_token=${TOKEN}`;
   const res = await fetch(url, { cache: "no-store" });
   return res.json();
@@ -23,8 +23,10 @@ function extractLeads(actions: any[]): number {
   return parseInt(actions?.find((a: any) => a.action_type === "lead")?.value || "0");
 }
 
-function extractOutboundClicks(outbound_clicks: any[]): number {
-  return parseInt(outbound_clicks?.find((a: any) => a.action_type === "outbound_click")?.value || "0");
+function extractOutboundClicks(outbound_clicks: any[], clicks_fallback?: string): number {
+  const outbound = parseInt(outbound_clicks?.find((a: any) => a.action_type === "outbound_click")?.value || "0");
+  if (outbound > 0) return outbound;
+  return parseInt(clicks_fallback || "0");
 }
 
 function buildTotals(list: any[]) {
@@ -67,7 +69,7 @@ export async function GET(request: Request) {
 
     const allCampaigns = (campaignJson.data || []).map((c: any) => {
       const leads = extractLeads(c.actions);
-      const clicks = extractOutboundClicks(c.outbound_clicks);
+      const clicks = extractOutboundClicks(c.outbound_clicks, c.clicks);
       const spend = parseFloat(c.spend || "0");
       const impressions = parseInt(c.impressions || "0");
       return {
@@ -85,7 +87,7 @@ export async function GET(request: Request) {
 
     const adsets = (adsetJson.data || []).map((a: any) => {
       const leads = extractLeads(a.actions);
-      const clicks = extractOutboundClicks(a.outbound_clicks);
+      const clicks = extractOutboundClicks(a.outbound_clicks, a.clicks);
       const spend = parseFloat(a.spend || "0");
       const impressions = parseInt(a.impressions || "0");
       return {
@@ -103,7 +105,7 @@ export async function GET(request: Request) {
 
     const ads = (adJson.data || []).map((a: any) => {
       const leads = extractLeads(a.actions);
-      const clicks = extractOutboundClicks(a.outbound_clicks);
+      const clicks = extractOutboundClicks(a.outbound_clicks, a.clicks);
       const spend = parseFloat(a.spend || "0");
       const impressions = parseInt(a.impressions || "0");
       return {
