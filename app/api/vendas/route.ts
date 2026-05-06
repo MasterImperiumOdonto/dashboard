@@ -7,6 +7,7 @@ const LISTS: Record<string, string> = {
   "Fevereiro": "901325070842",
   "Março": "901325974955",
   "Abril": "901326648601",
+  "Maio": "901327058856",
 };
 
 const STATUS_6M = "assessorado 6 meses";
