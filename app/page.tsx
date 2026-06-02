@@ -664,10 +664,11 @@ export default function Dashboard() {
                         { l: "CPC", v: brl(c.cpc) },
                         { l: "CTR", v: `${c.ctr}%` },
                         { l: "Cliques", v: String(c.clicks) },
+                        { l: isForm ? "Conv. Formulário" : "Conv. LP", v: c.clicks > 0 ? `${((c.leads / c.clicks) * 100).toFixed(1)}%` : "—", highlight: true },
                       ].map((m) => (
                         <div key={m.l}>
                           <p style={{ fontSize: 9, fontWeight: 600, letterSpacing: "2px", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 6 }}>{m.l}</p>
-                          <p style={{ fontSize: 20, fontWeight: 800, color: C.branco }}>{m.v}</p>
+                          <p style={{ fontSize: 20, fontWeight: 800, color: (m as any).highlight ? C.dourado : C.branco }}>{m.v}</p>
                         </div>
                       ))}
                     </div>
