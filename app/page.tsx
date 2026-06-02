@@ -26,7 +26,7 @@ interface MetaAd {
 }
 interface MetaResponse {
   accounts: string[]; selectedAccount: string;
-  campaigns: MetaCampaign[]; allCampaigns: MetaCampaign[];
+  campaigns: MetaCampaign[]; captacao: MetaCampaign[]; allCampaigns: MetaCampaign[];
   adsets: MetaAdset[]; ads: MetaAd[]; totals: MetaTotals;
 }
 interface LeadsStats { total: number; mql: number; naoMql: number; icpStart: number; icpAceleracao: number; }
@@ -539,13 +539,34 @@ export default function Dashboard() {
           {metaError ? (
             <div style={{ background: "#141414", borderRadius: 12, padding: 20, color: C.vermelho, fontSize: 14 }}>{metaError}</div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-              <KpiCard label="Investimento" value={meta ? brl(ft.spend) : "—"} dark />
-              <KpiCard label="Leads Meta" value={meta ? String(ft.leads) : "—"} dark />
-              <KpiCard label="CPL" value={meta ? brl(ft.cpl) : "—"} dark />
-              <KpiCard label="CPC" value={meta ? brl(ft.cpc) : "—"} />
-              <KpiCard label="CTR" value={meta ? `${ft.ctr}%` : "—"} />
-              <KpiCard label="Cliques" value={meta ? String(ft.clicks) : "—"} />
+            <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+                <KpiCard label="Investimento" value={meta ? brl(ft.spend) : "—"} dark />
+                <KpiCard label="Leads Meta" value={meta ? String(ft.leads) : "—"} dark />
+                <KpiCard label="CPL" value={meta ? brl(ft.cpl) : "—"} dark />
+                <KpiCard label="CPC" value={meta ? brl(ft.cpc) : "—"} />
+                <KpiCard label="CTR" value={meta ? `${ft.ctr}%` : "—"} />
+                <KpiCard label="Cliques" value={meta ? String(ft.clicks) : "—"} />
+              </div>
+
+              {meta && meta.captacao && meta.captacao.length > 0 && (
+                <div>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "3px", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 12 }}>CAPTAÇÃO — SALA SECRETA</p>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+                    {meta.captacao.map((c) => {
+                      const conv = c.clicks > 0 ? ((c.leads / c.clicks) * 100).toFixed(1) : "—";
+                      return [
+                        <KpiCard key={c.campaign_name + "_inv"} label="Investimento" value={brl(c.spend)} dark />,
+                        <KpiCard key={c.campaign_name + "_leads"} label="Leads" value={String(c.leads)} dark />,
+                        <KpiCard key={c.campaign_name + "_cpl"} label="CPL" value={brl(c.cpl)} dark />,
+                        <KpiCard key={c.campaign_name + "_cpc"} label="CPC" value={brl(c.cpc)} />,
+                        <KpiCard key={c.campaign_name + "_ctr"} label="CTR" value={`${c.ctr}%`} />,
+                        <KpiCard key={c.campaign_name + "_conv"} label="Conv. LP" value={conv === "—" ? "—" : `${conv}%`} accent={C.dourado} />,
+                      ];
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </section>

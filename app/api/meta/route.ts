@@ -10,6 +10,9 @@ const AD_ACCOUNTS: Record<string, string> = {
 const SE_CAMPAIGNS = [
   "[NIC][AS] - [SE][FORMS][ABO]",
   "[NIC][AS] - [SE][LEADS][ABO]",
+];
+
+const CAPTACAO_CAMPAIGNS = [
   "[L3A][AQV2][JUNHO/26][CAPTAÇÃO][ABO]",
 ];
 
@@ -124,11 +127,13 @@ export async function GET(request: Request) {
     });
 
     const seCampaigns = allCampaigns.filter((c: any) => c.isSE);
+    const captacaoCampaigns = allCampaigns.filter((c: any) => CAPTACAO_CAMPAIGNS.includes(c.campaign_name));
 
     return NextResponse.json({
       accounts: Object.keys(AD_ACCOUNTS),
       selectedAccount: accountKey,
       campaigns: seCampaigns,
+      captacao: captacaoCampaigns,
       allCampaigns,
       adsets,
       ads,
