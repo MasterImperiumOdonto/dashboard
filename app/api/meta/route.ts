@@ -10,6 +10,7 @@ const AD_ACCOUNTS: Record<string, string> = {
 const SE_CAMPAIGNS = [
   "[NIC][AS] - [SE][FORMS][ABO]",
   "[NIC][AS] - [SE][LEADS][ABO]",
+  "[L3A][AQV2][JUNHO/26][CAPTAÇÃO][ABO]",
 ];
 
 async function fetchInsights(accountId: string, timeRange: string, level: string) {
