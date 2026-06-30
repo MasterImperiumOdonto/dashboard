@@ -31,7 +31,7 @@ interface MetaResponse {
 }
 interface LeadsStats { total: number; mql: number; naoMql: number; icpStart: number; icpAceleracao: number; }
 interface LeadsResponse { total: LeadsStats; meta: LeadsStats; bio: LeadsStats; }
-interface VendasResponse { lists: string[]; selectedList: string; v6: number; v12: number; totalVendas: number; mrr: number; faturamento: number; }
+interface VendasResponse { lists: string[]; selectedList: string; v6: number; v12: number; totalVendas: number; mrr: number; faturamento: number; origens: Record<string, number>; }
 
 const monthStart = () => { const d = new Date(); d.setDate(1); return d.toISOString().split("T")[0]; };
 const todayStr = () => new Date().toISOString().split("T")[0];
@@ -252,7 +252,7 @@ export default function Dashboard() {
   const [account, setAccount] = useState("CA-CONTING");
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
   const [selectedAdsets, setSelectedAdsets] = useState<string[]>([]);
-  const [selectedCrm, setSelectedCrm] = useState("Abril");
+  const [selectedCrm, setSelectedCrm] = useState("Junho");
   const [loading, setLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
@@ -956,6 +956,20 @@ export default function Dashboard() {
               )}
             </div>
           </div>
+
+          {vendas && vendas.origens && Object.keys(vendas.origens).length > 0 && (
+            <div style={{ marginTop: 16 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "3px", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", marginBottom: 12 }}>ORIGEM DAS VENDAS</p>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+                {Object.entries(vendas.origens).sort((a, b) => b[1] - a[1]).map(([origem, count]) => (
+                  <div key={origem} style={{ background: "#141414", borderRadius: 10, padding: "16px 20px", border: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.6)" }}>{origem}</p>
+                    <p style={{ fontSize: 28, fontWeight: 900, color: C.dourado, lineHeight: 1 }}>{count}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
         )}
 
