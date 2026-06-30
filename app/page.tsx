@@ -593,12 +593,12 @@ export default function Dashboard() {
               {leads && (
                 <div style={{ background: "#141414", borderRadius: 12, padding: "20px 28px", border: `1px solid rgba(201,168,76,0.2)`, display: "flex", alignItems: "center", gap: 0, flexWrap: "wrap" }}>
                   {[
-                    { l: "Total de Leads", v: leads.total.total, c: C.branco },
-                    { l: "MQL", v: leads.total.mql, c: C.dourado },
-                    { l: "Não-MQL", v: leads.total.naoMql, c: C.vermelho },
-                    { l: "Oport. Start", v: leads.total.icpStart, c: C.azul },
-                    { l: "Oport. Aceleração", v: leads.total.icpAceleracao, c: C.dourado },
-                    { l: "Receita Potencial", v: `R$${((leads.total.icpStart * 8400) + (leads.total.icpAceleracao * 24000)).toLocaleString("pt-BR")}`, c: C.verde },
+                    { l: "Leads Meta", v: leads.meta.total, c: C.branco },
+                    { l: "MQL", v: leads.meta.mql, c: C.dourado },
+                    { l: "Não-MQL", v: leads.meta.naoMql, c: C.vermelho },
+                    { l: "Oport. Start", v: leads.meta.icpStart, c: C.azul },
+                    { l: "Oport. Aceleração", v: leads.meta.icpAceleracao, c: C.dourado },
+                    { l: "Receita Potencial", v: `R$${((leads.meta.icpStart * 8400) + (leads.meta.icpAceleracao * 24000)).toLocaleString("pt-BR")}`, c: C.verde },
                   ].map((m, i, arr) => (
                     <div key={m.l} style={{ display: "flex", alignItems: "center" }}>
                       <div style={{ padding: "0 24px", textAlign: "center" }}>

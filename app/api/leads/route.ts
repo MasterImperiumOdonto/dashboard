@@ -130,6 +130,32 @@ function processLeadsLP(rows: any[][], since: string, until: string) {
   return { meta, bio };
 }
 
+function processSEForms(rows: any[][], since: string, until: string): SourceStats {
+  const stats = emptyStats();
+  if (rows.length < 2) return stats;
+
+  const headers = rows[0].map((h: string) => (h || "").toString().toLowerCase().trim());
+  const dateIdx = headers.findIndex((h: string) => h.includes("started") || h.includes("submitted"));
+  const funcaoIdx = headers.findIndex((h: string) => h.includes("fun") || h.includes("cargo") || h.includes("você é"));
+  const fatIdx = headers.findIndex((h: string) => h.includes("faturamento") || h.includes("fatura"));
+  const investeIdx = headers.findIndex((h: string) => h.includes("invest") || h.includes("marketing"));
+
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    const dateStr = (dateIdx >= 0 ? row[dateIdx] : row[0]) || "";
+    if (!inRange(dateStr, since, until)) continue;
+    stats.total++;
+    const funcao = funcaoIdx >= 0 ? (row[funcaoIdx] || "") : "";
+    const fat = fatIdx >= 0 ? (row[fatIdx] || "") : "";
+    const investe = investeIdx >= 0 ? (row[investeIdx] || "") : "";
+    const result = classifyMQL(funcao, fat, investe);
+    if (result === "MQL") addMQL(stats, fat);
+    else stats.naoMql++;
+  }
+
+  return stats;
+}
+
 function processFormsNativo(rows: any[][], since: string, until: string): SourceStats {
   const stats = emptyStats();
   if (rows.length < 2) return stats;
@@ -185,16 +211,17 @@ export async function GET(request: Request) {
     );
     oauth2Client.setCredentials(tokens);
 
-    const [lpRows, formsRows] = await Promise.all([
+    const [lpRows, formsRows, seFormsRows] = await Promise.all([
       getSheetData(oauth2Client, "leads LP!A:Z"),
       getSheetData(oauth2Client, "SE - FORMS NATIVO SEM COND!A:Z"),
+      getSheetData(oauth2Client, "[SE] Forms!A:Z"),
     ]);
 
     const lp = processLeadsLP(lpRows, since, until);
     const forms = processFormsNativo(formsRows, since, until);
+    const seForms = processSEForms(seFormsRows, since, until);
 
-    // meta = LP meta + forms (forms não tem BIO)
-    const metaTotal = sumStats(lp.meta, forms);
+    const metaTotal = sumStats(sumStats(lp.meta, forms), seForms);
     const bioTotal = lp.bio;
     const grandTotal = sumStats(metaTotal, bioTotal);
 
